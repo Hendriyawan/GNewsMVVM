@@ -108,4 +108,3 @@ app/src/main/java/com/hdev/gnews/
 
 ---
 
-**Developed by [Your Name]** - 2024
