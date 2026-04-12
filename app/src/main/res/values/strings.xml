@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">GNews</string>
+    <string name="title_home">Home</string>
+    <string name="title_trends">Trends</string>
+    <string name="title_explore">Explore</string>
+    <string name="title_sources">Sources</string>
+    <string name="title_saved">Saved</string>
+    <string name="text_version_app">Version (1.0)</string>
+    <string name="text_title_menu_search">Search</string>
+    <string name="title_menu_save_news">Save</string>
+    <string name="button_text_read_full_article">Read Full Article</string>
+    <string name="text_input_layout_search_publisher">Search publisher name...</string>
+    <string name="text_button_visit_website">Visit Website</string>
+    <string name="text_latest_news">Latest News</string>
+
+    <!-- Empty States -->
+    <string name="empty_home">No headlines available right now.</string>
+    <string name="empty_trends">No trending articles found for this category.</string>
+    <string name="empty_sources">No news sources found matching your search.</string>
+    <string name="empty_saved">You haven\'t saved any articles yet.</string>
+    <string name="empty_source_detail">This source doesn\'t have any articles at the moment.</string>
+    <string name="text_no_data_found">No Data Found</string>
+</resources>

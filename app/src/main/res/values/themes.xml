@@ -1,0 +1,30 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.GNews" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="fontFamily">@font/newsreader</item>
+        <item name="android:fontFamily">@font/newsreader</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.GNews.TitleMedium</item>
+    </style>
+
+    <style name="Theme.GNews" parent="Base.Theme.GNews" />
+
+    <!-- theme for splashscreen-->
+    <style name="Theme.GNewsSplashTheme" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/background_splash</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/app_logo</item>
+        <item name="windowSplashScreenAnimationDuration">2000</item>
+        <item name="postSplashScreenTheme">@style/Theme.GNews</item>
+    </style>
+    <style name="ShapeAppearanceOverlay.App.CornerSize8dp" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
+    <style name="TextAppearance.GNews.TitleMedium" parent="TextAppearance.Material3.TitleMedium">
+        <item name="fontFamily">@font/newsreader</item>
+        <item name="android:fontFamily">@font/newsreader</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

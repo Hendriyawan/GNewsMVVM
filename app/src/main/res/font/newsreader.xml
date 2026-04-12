@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<font-family xmlns:app="http://schemas.android.com/apk/res-auto">
+    <!-- Tambahkan varian Regular (Sangat Penting) -->
+    <font
+        app:font="@font/newsreader_14_regular"
+        app:fontStyle="normal"
+        app:fontWeight="400" />
+
+    <!-- Varian Bold yang sudah Anda punya -->
+    <font
+        app:font="@font/newsreader_14_bold"
+        app:fontStyle="normal"
+        app:fontWeight="700" />
+</font-family>
