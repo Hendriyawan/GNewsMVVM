@@ -7,7 +7,7 @@
 [![Retrofit](https://img.shields.io/badge/Networking-Retrofit-red.svg)](https://square.github.io/retrofit/)
 
 <p align="center">
-  <img src="GNewsSS/GnewsMVVM.jpg" width="200" />
+  <img src="GNewsSS/GnewsMVVM.jpg" />
 </p>
 
 **GNews** is a high-performance news application built with **Clean Architecture** and **MVVM** pattern. It fetches real-time news data from [NewsAPI.org](https://newsapi.org/) and provides a seamless user experience with local caching, dependency injection, and modern UI components.
