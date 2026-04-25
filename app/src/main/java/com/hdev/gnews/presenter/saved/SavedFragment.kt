@@ -14,8 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.hdev.gnews.R
 import com.hdev.gnews.core.startActivity
 import com.hdev.gnews.databinding.FragmentSavedBinding
-import com.hdev.gnews.domain.model.news.ArticlesItem
-import com.hdev.gnews.domain.model.news.Source
+import com.hdev.gnews.domain.model.news.Article
 import com.hdev.gnews.presenter.home.DetailNewsActivity
 import com.hdev.gnews.presenter.home.HomeNewsAdapter
 import dagger.hilt.android.AndroidEntryPoint
@@ -67,25 +66,13 @@ class SavedFragment : Fragment() {
                     if (isEmpty) {
                         binding.emptyView.tvMessage.setText(R.string.empty_saved)
                     } else {
-
-                        val articles = favoriteList.map { entity ->
-                            ArticlesItem(
-                                url = entity.url,
-                                title = entity.title,
-                                author = entity.author,
-                                description = entity.description,
-                                urlToImage = entity.urlToImage,
-                                publishedAt = entity.publishedAt,
-                                content = entity.content,
-                                source = Source(name = entity.sourceName)
-                            )
-                        }
-                        newsAdapter.submitList(articles)
+                        newsAdapter.submitList(favoriteList)
                     }
                 }
             }
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

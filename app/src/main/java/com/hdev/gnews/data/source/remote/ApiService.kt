@@ -1,8 +1,7 @@
 package com.hdev.gnews.data.source.remote
 
-import com.hdev.gnews.domain.model.news.EverythingResponse
-import com.hdev.gnews.domain.model.news.SourcesResponse
-import com.hdev.gnews.domain.model.news.TopHeadlineResponse
+import com.hdev.gnews.data.source.remote.dto.NewsResponseDto
+import com.hdev.gnews.data.source.remote.dto.SourcesResponseDto
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -15,7 +14,7 @@ interface ApiService {
         @Query("category") category: String? = null,
         @Query("page") page : Int = 1,
         @Query("pageSize") pageSize: Int = 20
-    ) : Response<TopHeadlineResponse>
+    ) : Response<NewsResponseDto>
 
     @GET("v2/everything")
     suspend fun getEverything(
@@ -25,12 +24,12 @@ interface ApiService {
         @Query("language") language: String? = "en",
         @Query("page") page: Int = 1,
         @Query("pageSize") pageSize: Int = 20
-    ): Response<EverythingResponse>
+    ): Response<NewsResponseDto>
 
     @GET("v2/top-headlines/sources")
     suspend fun getSources(
         @Query("category") category: String? = null,
         @Query("language") language: String? = "en",
         @Query("country") country: String? = "us"
-    ) : Response<SourcesResponse>
+    ) : Response<SourcesResponseDto>
 }

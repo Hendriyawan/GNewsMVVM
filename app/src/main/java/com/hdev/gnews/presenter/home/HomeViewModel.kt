@@ -3,10 +3,9 @@ package com.hdev.gnews.presenter.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hdev.gnews.domain.model.Resource
-import com.hdev.gnews.domain.model.news.ArticlesItem
-import com.hdev.gnews.domain.model.news.EverythingResponse
-import com.hdev.gnews.domain.model.news.TopHeadlineResponse
-import com.hdev.gnews.domain.repository.NewsRepository
+import com.hdev.gnews.domain.model.news.Article
+import com.hdev.gnews.domain.model.news.NewsResult
+import com.hdev.gnews.domain.usecase.news.GetTopHeadlineUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,9 +15,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(private val repository: NewsRepository) : ViewModel() {
+class HomeViewModel @Inject constructor(
+    private val getTopHeadlineUseCase: GetTopHeadlineUseCase
+) : ViewModel() {
 
-    private val _topHeadlineState = MutableStateFlow<Resource<TopHeadlineResponse>?>(null)
+    private val _topHeadlineState = MutableStateFlow<Resource<NewsResult>?>(null)
     val topHeadlineState = _topHeadlineState.asStateFlow()
 
     private val _errorMessage = MutableSharedFlow<String>()
@@ -29,7 +30,7 @@ class HomeViewModel @Inject constructor(private val repository: NewsRepository) 
     private var currentPage = 1
     private var currentCategory: String? = null
     private var isLastPage = false
-    private val articlesList = mutableListOf<ArticlesItem>()
+    private val articlesList = mutableListOf<Article>()
 
     fun getTopHeadline(
         country: String = "us",
@@ -48,7 +49,7 @@ class HomeViewModel @Inject constructor(private val repository: NewsRepository) 
         }
 
         getTopHeadlineJob = viewModelScope.launch {
-            repository.getTopHeadline(
+            getTopHeadlineUseCase(
                 country = country,
                 category = currentCategory,
                 page = currentPage,
@@ -56,22 +57,22 @@ class HomeViewModel @Inject constructor(private val repository: NewsRepository) 
             ).collect { resource ->
                 when (resource) {
                     is Resource.Success -> {
-                        val newArticles = resource.data?.articles?.filterNotNull() ?: emptyList()
+                        val newArticles = resource.data?.articles ?: emptyList()
                         if (newArticles.isEmpty()) {
                             isLastPage = true
                         } else {
                             articlesList.addAll(newArticles)
                         }
                         _topHeadlineState.value = Resource.Success(
-                            TopHeadlineResponse(
+                            NewsResult(
                                 articles = articlesList.toList(),
                                 status = resource.data?.status,
-                                totalResults = resource.data?.totalResults
+                                totalResults = resource.data?.totalResults ?: articlesList.size
                             )
                         )
                     }
                     is Resource.Error -> {
-                        _topHeadlineState.value = resource
+                        _topHeadlineState.value = Resource.Error(resource.message ?: "failed to get data")
                         _errorMessage.emit(resource.message ?: "failed to get data")
                     }
                     is Resource.Loading -> {

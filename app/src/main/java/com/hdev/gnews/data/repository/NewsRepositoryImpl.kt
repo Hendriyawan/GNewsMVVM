@@ -1,19 +1,20 @@
 package com.hdev.gnews.data.repository
 
+import com.hdev.gnews.data.mapper.toCacheEntity
+import com.hdev.gnews.data.mapper.toDomain
+import com.hdev.gnews.data.mapper.toEntity
 import com.hdev.gnews.core.utils.NetworkMonitor
-import com.hdev.gnews.data.source.local.room.dao.NewsCacheEntity
 import com.hdev.gnews.data.source.local.room.dao.NewsDao
-import com.hdev.gnews.data.source.local.room.entity.NewsEntity
 import com.hdev.gnews.data.source.remote.ApiService
 import com.hdev.gnews.domain.model.Resource
-import com.hdev.gnews.domain.model.news.ArticlesItem
-import com.hdev.gnews.domain.model.news.EverythingResponse
-import com.hdev.gnews.domain.model.news.SourcesResponse
-import com.hdev.gnews.domain.model.news.TopHeadlineResponse
+import com.hdev.gnews.domain.model.news.Article
+import com.hdev.gnews.domain.model.news.NewsResult
+import com.hdev.gnews.domain.model.news.SourcesResult
 import com.hdev.gnews.domain.repository.NewsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class NewsRepositoryImpl @Inject constructor(
@@ -22,16 +23,20 @@ class NewsRepositoryImpl @Inject constructor(
     private val networkMonitor: NetworkMonitor
 ) : ResponseHelper(), NewsRepository {
 
+    companion object {
+        private const val DEFAULT_CATEGORY = "general"
+        private const val OFFLINE_ERROR = "No internet connection and no cached data available."
+    }
 
-    override suspend fun getTopHeadline(
+    override fun getTopHeadline(
         country: String,
         category: String?,
         page: Int,
         pageSize: Int
-    ): Flow<Resource<TopHeadlineResponse>> = flow {
+    ): Flow<Resource<NewsResult>> = flow {
         emit(Resource.Loading())
 
-        val cacheCategory = category ?: "general"
+        val cacheCategory = category ?: DEFAULT_CATEGORY
 
         if (networkMonitor.isCurrentlyOnline()) {
             val apiResponse = saveApiCall {
@@ -44,62 +49,53 @@ class NewsRepositoryImpl @Inject constructor(
             }
 
             apiResponse.collect { resource ->
-                if (resource is Resource.Success) {
-                    // Save to Cache
-                    val cacheList = resource.data?.articles?.filterNotNull()?.map { article ->
-                        NewsCacheEntity(
-                            url = article.url ?: "",
-                            title = article.title,
-                            author = article.author,
-                            description = article.description,
-                            urlToImage = article.urlToImage,
-                            publishedAt = article.publishedAt,
-                            content = article.content,
-                            sourceName = article.source?.name,
-                            category = cacheCategory
-                        )
-                    }
-                    if (cacheList != null) {
+                when (resource) {
+                    is Resource.Success -> {
+                        val newsResult = resource.data?.toDomain() ?: NewsResult()
+                        val cacheList = newsResult.articles.map { article ->
+                            article.toCacheEntity(cacheCategory)
+                        }
                         newsDao.deleteNewsCache(cacheCategory)
                         newsDao.insertNewsCache(cacheList)
+                        emit(Resource.Success(newsResult))
                     }
+                    is Resource.Error -> emit(
+                        Resource.Error(
+                            resource.message ?: "Failed to fetch top headlines."
+                        )
+                    )
+                    is Resource.Loading -> Unit
                 }
-                emit(resource)
             }
         } else {
-            // Load from Cache
             val localData = newsDao.getNewsCache(cacheCategory)
             if (localData.isNotEmpty()) {
-                val articles = localData.map { entity ->
-                    ArticlesItem(
-                        url = entity.url,
-                        title = entity.title,
-                        author = entity.author,
-                        description = entity.description,
-                        urlToImage = entity.urlToImage,
-                        publishedAt = entity.publishedAt,
-                        content = entity.content,
-                        source = com.hdev.gnews.domain.model.news.Source(name = entity.sourceName)
+                emit(
+                    Resource.Success(
+                        NewsResult(
+                            status = "ok",
+                            totalResults = localData.size,
+                            articles = localData.map { entity -> entity.toDomain() }
+                        )
                     )
-                }
-                emit(Resource.Success(TopHeadlineResponse(articles = articles, status = "ok", totalResults = articles.size)))
+                )
             } else {
-                emit(Resource.Error("No internet connection and no cached data available."))
+                emit(Resource.Error(OFFLINE_ERROR))
             }
         }
     }
 
-    override suspend fun getEverything(
+    override fun getEverything(
         query: String?,
         sources: String?,
         sortBy: String?,
         language: String?,
         page: Int,
         pageSize: Int
-    ): Flow<Resource<EverythingResponse>>  = flow {
+    ): Flow<Resource<NewsResult>>  = flow {
         emit(Resource.Loading())
         if(networkMonitor.isCurrentlyOnline()){
-            val apiResponse = saveApiCall {
+            emitAll(saveApiCall {
                 apiService.getEverything(
                     query = query,
                     sources = sources,
@@ -108,36 +104,52 @@ class NewsRepositoryImpl @Inject constructor(
                     page = page,
                     pageSize = pageSize
                 )
-            }
-            emitAll(apiResponse)
+            }.map { resource ->
+                when (resource) {
+                    is Resource.Success -> Resource.Success(resource.data?.toDomain() ?: NewsResult())
+                    is Resource.Error -> Resource.Error(resource.message ?: "Failed to fetch articles.")
+                    is Resource.Loading -> Resource.Loading()
+                }
+            })
         } else {
-            emit(Resource.Error("No connection internet !"))
+            emit(Resource.Error("No internet connection."))
         }
     }
 
-    override suspend fun getSources(
+    override fun getSources(
         category: String?,
         language: String?,
         country: String?
-    ): Flow<Resource<SourcesResponse>> = flow {
+    ): Flow<Resource<SourcesResult>> = flow {
         emit(Resource.Loading())
         if (networkMonitor.isCurrentlyOnline()) {
-            val apiResponse = saveApiCall {
+            emitAll(saveApiCall {
                 apiService.getSources(
                     category = category,
                     language = language,
                     country = country
                 )
-            }
-            emitAll(apiResponse)
+            }.map { resource ->
+                when (resource) {
+                    is Resource.Success -> Resource.Success(resource.data?.toDomain() ?: SourcesResult())
+                    is Resource.Error -> Resource.Error(resource.message ?: "Failed to fetch sources.")
+                    is Resource.Loading -> Resource.Loading()
+                }
+            })
         } else {
-            emit(Resource.Error("No connection internet !"))
+            emit(Resource.Error("No internet connection."))
         }
     }
 
-    override fun getAllFavoriteNews(): Flow<List<NewsEntity>> = newsDao.getAllFavoriteNews()
-    override suspend fun insertFavoriteNews(news: NewsEntity) = newsDao.insertFavoriteNews(news)
-    override suspend fun deleteFavoriteNews(news: NewsEntity) = newsDao.deleteFavoriteNews(news)
+    override fun getFavoriteNews(): Flow<List<Article>> =
+        newsDao.getAllFavoriteNews().map { entities -> entities.map { entity -> entity.toDomain() } }
+
+    override suspend fun saveFavoriteNews(article: Article) =
+        newsDao.insertFavoriteNews(article.toEntity())
+
+    override suspend fun deleteFavoriteNews(article: Article) =
+        newsDao.deleteFavoriteNews(article.toEntity())
+
     override fun isFavoriteNews(url: String): Flow<Boolean> = newsDao.isFavoriteNews(url)
 
 }

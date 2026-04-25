@@ -11,7 +11,6 @@ open class ResponseHelper {
     private val gson = Gson()
 
     protected fun <T> saveApiCall(apiCall: suspend () -> Response<T>) : Flow<Resource<T>> = flow {
-        emit(Resource.Loading())
         try {
             val response = apiCall()
             if(response.isSuccessful){

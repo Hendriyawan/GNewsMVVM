@@ -12,6 +12,15 @@
 
 **GNews** is a high-performance news application built with **Clean Architecture** and **MVVM** pattern. It fetches real-time news data from [NewsAPI.org](https://newsapi.org/) and provides a seamless user experience with local caching, dependency injection, and modern UI components.
 
+## Repo Contents
+
+This repository now contains **two reference implementations**:
+
+- `app/` → the original **Android native Kotlin** app.
+- `flutter_app/` → the new **Flutter Clean Architecture + repository + BLoC/Cubit** port for learning and comparison.
+
+If your goal is to study architecture in Flutter, start from `flutter_app/`.
+
 ---
 
 ## ✨ Key Features
@@ -106,5 +115,35 @@ app/src/main/java/com/hdev/gnews/
 4.  **Build & Run**:
     Open in Android Studio and run on an Emulator or Physical Device.
 
----
+## Flutter Version
 
+The Flutter conversion lives in [`flutter_app/`](flutter_app).
+
+### Run the Flutter app
+
+1.  Move to the Flutter project:
+    ```sh
+    cd flutter_app
+    ```
+2.  Install packages:
+    ```sh
+    flutter pub get
+    ```
+3.  Run in demo mode:
+    ```sh
+    flutter run
+    ```
+4.  Run with live NewsAPI data:
+    ```sh
+    flutter run --dart-define=NEWS_API_KEY=YOUR_KEY_HERE
+    ```
+
+### Flutter Architecture Notes
+
+- Uses `core`, `data`, `domain`, and `presentation` layers.
+- Uses `flutter_bloc` with `Cubit` for state management.
+- Uses repositories directly from Cubit without a separate use case layer.
+- Stores saved articles and cached headline/source responses locally with `SharedPreferences`.
+- Falls back to **demo seeded data** when `NEWS_API_KEY` is not provided, so the project can still run as a reference template.
+
+---

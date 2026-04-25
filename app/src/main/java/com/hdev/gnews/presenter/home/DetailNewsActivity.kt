@@ -20,9 +20,8 @@ import com.bumptech.glide.Glide
 import com.hdev.gnews.R
 import com.hdev.gnews.core.parcelable
 import com.hdev.gnews.core.toTimeAgo
-import com.hdev.gnews.data.source.local.room.entity.NewsEntity
 import com.hdev.gnews.databinding.ActivityDetailNewsBinding
-import com.hdev.gnews.domain.model.news.ArticlesItem
+import com.hdev.gnews.domain.model.news.Article
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -37,7 +36,7 @@ class DetailNewsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDetailNewsBinding
     private val viewModel: DetailNewsViewModel by viewModels()
     private var isFavorite: Boolean = false
-    private var article: ArticlesItem? = null
+    private var article: Article? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -51,14 +50,14 @@ class DetailNewsActivity : AppCompatActivity() {
             insets
         }
         //get data from intent
-        article = intent.parcelable<ArticlesItem>(ARTICLE)
+        article = intent.parcelable<Article>(ARTICLE)
         article?.let {
             setupUI(it)
             observeFavoriteStatus(it.url ?: "")
         }
     }
 
-    private fun setupUI(article: ArticlesItem) {
+    private fun setupUI(article: Article) {
         setupToolbar()
         with(binding) {
             // Load image from url using Glide
@@ -127,17 +126,7 @@ class DetailNewsActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_save -> {
                 article?.let {
-                    val newsEntity = NewsEntity(
-                        url = it.url ?: "",
-                        title = it.title,
-                        author = it.author,
-                        description = it.description,
-                        urlToImage = it.urlToImage,
-                        publishedAt = it.publishedAt,
-                        content = it.content,
-                        sourceName = it.source?.name
-                    )
-                    viewModel.toggleFavorite(newsEntity, isFavorite)
+                    viewModel.toggleFavorite(it, isFavorite)
                 }
                 true
             }

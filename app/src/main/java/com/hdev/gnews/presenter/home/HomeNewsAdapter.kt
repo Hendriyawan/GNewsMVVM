@@ -11,10 +11,10 @@ import com.hdev.gnews.core.toTimeAgo
 import com.hdev.gnews.databinding.ItemLoadingBinding
 import com.hdev.gnews.databinding.ItemTopHeadlineBinding
 import com.hdev.gnews.databinding.ItemTopHeadlineFeaturedBinding
-import com.hdev.gnews.domain.model.news.ArticlesItem
+import com.hdev.gnews.domain.model.news.Article
 
-class HomeNewsAdapter(private val savedNews: Boolean = false, private val onItemClick: (ArticlesItem) -> Unit) :
-    ListAdapter<ArticlesItem, RecyclerView.ViewHolder>(
+class HomeNewsAdapter(private val savedNews: Boolean = false, private val onItemClick: (Article) -> Unit) :
+    ListAdapter<Article, RecyclerView.ViewHolder>(
         ArticleDiffCallback()
     ) {
 
@@ -78,7 +78,7 @@ class HomeNewsAdapter(private val savedNews: Boolean = false, private val onItem
     //ViewHolder for TopHeadlineFeatured
     inner class FeatureTopHeadlineViewHolder(private val binding: ItemTopHeadlineFeaturedBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(article: ArticlesItem) {
+        fun bind(article: Article) {
             binding.apply {
                 tvFeaturedTitle.text = article.title
                 tvFeaturedDesc.text = article.description
@@ -98,7 +98,7 @@ class HomeNewsAdapter(private val savedNews: Boolean = false, private val onItem
     inner class StandardTopHeadlineViewHolder(private val binding: ItemTopHeadlineBinding) :
         RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("SetTextI18n")
-        fun bind(article: ArticlesItem) {
+        fun bind(article: Article) {
             binding.apply {
                 tvTitle.text = article.title
                 tvSource.text = article.source?.name ?: "--"
@@ -115,13 +115,14 @@ class HomeNewsAdapter(private val savedNews: Boolean = false, private val onItem
 
     inner class LoadingViewHolder(binding: ItemLoadingBinding) : RecyclerView.ViewHolder(binding.root)
 
-    class ArticleDiffCallback : DiffUtil.ItemCallback<ArticlesItem>() {
-        override fun areItemsTheSame(oldItem: ArticlesItem, newItem: ArticlesItem): Boolean {
+    class ArticleDiffCallback : DiffUtil.ItemCallback<Article>() {
+        override fun areItemsTheSame(oldItem: Article, newItem: Article): Boolean {
             return oldItem.url == newItem.url
         }
 
-        override fun areContentsTheSame(oldItem: ArticlesItem, newItem: ArticlesItem): Boolean {
+        override fun areContentsTheSame(oldItem: Article, newItem: Article): Boolean {
             return oldItem == newItem
         }
     }
 }
+

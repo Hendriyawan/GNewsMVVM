@@ -46,9 +46,10 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
+
     buildFeatures {
         buildConfig = true
         viewBinding = true
@@ -58,6 +59,10 @@ android {
             excludes += "META-INF/{AL2.0, LGPL2.1}"
         }
     }
+}
+
+kotlin {
+    jvmToolchain(21)
 }
 
 dependencies {
